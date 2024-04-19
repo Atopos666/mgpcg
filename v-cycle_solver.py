@@ -70,6 +70,7 @@ def v_cycle(u, b, levels, restrict, prolongation, solve_coarsest):
         u[l] += prolongation.prolongate(u[l+1],int(math.sqrt(len(u[l]))))  # interpolate correction to the finer grid
         jacobi.damped_jacobi_smooth(L=levels[l], u=u[l],b=b[l],omega=2/3, iterations=1)
     
+    print(u[0][0])
     return u[0]
 
 # def Multigrid_Vcycle(level, A_list, R_list, b, x0, direct_n, PR_coef, smoother, pre_steps, pos_steps):

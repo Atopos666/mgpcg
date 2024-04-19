@@ -19,11 +19,14 @@ def generate_MAC_velocity_grid(n, liquid_probability=0.5):
         for j in range(n):
             if np.random.rand() <= liquid_probability:
                 cell_type[i, j] = 'liquid'
-                u[i, j] = np.random.randn()
-                u[i, j+1] = np.random.randn()
-                v[i, j] = np.random.randn()
-                v[i+1, j] = np.random.randn()
-
+                # u[i, j] = np.random.randn()
+                # u[i, j+1] = np.random.randn()
+                # v[i, j] = np.random.randn()
+                # v[i+1, j] = np.random.randn()
+                u[i, j] = 0
+                u[i, j+1] = 0
+                v[i, j] = 0
+                v[i+1, j] = 0
     return u, v, cell_type
 
 
