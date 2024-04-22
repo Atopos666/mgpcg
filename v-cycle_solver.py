@@ -1,6 +1,4 @@
 import numpy as np
-from numpy.linalg import norm, solve
-from scipy.sparse import csr_matrix, diags, eye
 from scipy.sparse.linalg import spsolve  
 import restrict
 import prolongation
@@ -10,9 +8,8 @@ import generate_equation
 import math
 import jacobi
 import gauss_seidel
-from scipy.sparse import csc_matrix
-from scipy.sparse.linalg import cg
-from scipy.sparse.linalg import LinearOperator
+
+
 
 
 def generate_multigrid_matrices(coarse_level):
@@ -32,7 +29,7 @@ def generate_multigrid_matrices(coarse_level):
 
 
 
-def v_cycle(u, b, levels, restrict, prolongation, solve_coarsest):
+def v_cycle(u, b, levels, restrict, prolongation):
     """
     V-Cycle Multigrid method to solve linear equations.
     
@@ -52,7 +49,7 @@ def v_cycle(u, b, levels, restrict, prolongation, solve_coarsest):
     print(L)
     # Downward cycle
     for l in range(L):
-        gauss_seidel.gauss_seidel_smooth(L=levels[l], u=u[l],b=b[l], iterations=1)
+        gauss_seidel.gauss_seidel_smooth(L=levels[l], u=u[l],b=b[l], iterations=20)
         r = b[l] - levels[l] @ u[l]  # compute the residual
         b[l+1] = restrict.restrict(r,int(math.sqrt(len(r))))  # restrict residual to the next coarser level
         u[l+1] = np.zeros_like(b[l+1])  # initial guess for the next level
@@ -68,34 +65,32 @@ def v_cycle(u, b, levels, restrict, prolongation, solve_coarsest):
     # Upward cycle
     for l in range(L-1, -1, -1):
         u[l] += prolongation.prolongate(u[l+1],int(math.sqrt(len(u[l]))))  # interpolate correction to the finer grid
-        jacobi.damped_jacobi_smooth(L=levels[l], u=u[l],b=b[l],omega=2/3, iterations=1)
-    
-    print(u[0][0])
+        jacobi.damped_jacobi_smooth(L=levels[l], u=u[l],b=b[l],omega=2/3, iterations=20)
+
     return u[0]
 
-# def Multigrid_Vcycle(level, A_list, R_list, b, x0, direct_n, PR_coef, smoother, pre_steps, pos_steps):
-#     A = A_list[level]
-#     if A.shape[0] <= direct_n or level == len(A_list) - 1:
-#         x = solve(A, b)
-#         return x
-#     x = smoother(A, b, 1e-14, pre_steps, x0)[0]
-#     R = R_list[level]
-#     P = PR_coef * R.T
-#     r = b - A.dot(x)
-#     r_H = R.dot(r)
-#     x0 = np.zeros(r_H.shape[0])
-#     e_H = Multigrid_Vcycle(level + 1, A_list, R_list, r_H, x0, direct_n, PR_coef, smoother, pre_steps, pos_steps)
-#     x += P.dot(e_H)
-#     x = smoother(A, b, 1e-14, pos_steps, x)[0]
-#     return x
+def main():
+    level = 5
+    u = [np.zeros(64 * 64 // (2 ** (2 * i))) for i in range(level)]
+    b = [np.zeros(64 * 64 // (2 ** (2 * i))) for i in range(level)]
+    levels, b[0] = generate_multigrid_matrices(level)
+    solution = v_cycle(u, b, levels, restrict, prolongation)
+    sum1 = 0
+    sum2 = 0
+    A_csr = levels[0].tocsr()
+    x = spsolve(A_csr, b[0])
+    for i in range(len(solution)):
+        if abs(solution[i]) > 1e-10:
+            print(i, solution[i], x[i])
+    for i in range(len(solution)):
+        sum1 += (solution[i] - x[i]) ** 2
+        sum2 += abs(solution[i] - x[i])
+    print(len(solution))
+    print(sum1)
+    print(sum2)
 
-level = 5
-u = [np.zeros(64 * 64 // (2 ** (2 * i))) for i in range(level)]
-b = [np.zeros(64 * 64 // (2 ** (2 * i))) for i in range(level)]
-levels, b[0] = generate_multigrid_matrices(level)
-solution = v_cycle(u, b, levels, restrict, prolongation, level)
-print(solution)
-print(len(solution))
+if __name__ == "__main__":
+    main()
 
 
 
