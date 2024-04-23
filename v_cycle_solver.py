@@ -13,7 +13,7 @@ import gauss_seidel
 
 
 def generate_multigrid_matrices(coarse_level):
-    gird = grid_generate.generate_fluid_grid(64, 0.3)
+    gird = grid_generate.generate_fluid_grid(256, 0.3)
     A_list = []
     A0, b0 = generate_equation.setup_poisson_equation(gird)
     A_list.append(A0)
@@ -46,7 +46,6 @@ def v_cycle(u, b, levels, restrict, prolongation):
     list: Updated solutions at each level after one V-cycle.
     """
     L = len(levels) - 1  # index of the last level
-    print(L)
     # Downward cycle
     for l in range(L):
         gauss_seidel.gauss_seidel_smooth(L=levels[l], u=u[l],b=b[l], iterations=20)
