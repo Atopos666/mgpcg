@@ -5,7 +5,7 @@ class TestMGPCG:
     def __init__(self, tolerance=1e-8):
         self.tolerance = tolerance
         self.max_iter = 1000
-        self.matrix_size = 256
+        self.matrix_size = 32
 
     def test_mgpcg(self):
         level = 5
@@ -30,7 +30,7 @@ class TestMGPCG:
             mu = np.average(r)
             v = np.linalg.norm(r, np.inf)
             print(v)
-            if v < self.tolerance or i == self.max_iter - 1:
+            if v < self.tolerance:
                 x = x + alpha * p
                 return x, i
             r = r - mu
@@ -46,8 +46,7 @@ class TestMGPCG:
     
 def main():
     test = TestMGPCG()
-    solution = test.test_mgpcg()[0]
-    iter = test.test_mgpcg()[1]
+    solution, iter = test.test_mgpcg()
     print(solution, iter)
 
 if __name__ == "__main__":

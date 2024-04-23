@@ -13,7 +13,7 @@ import gauss_seidel
 
 
 def generate_multigrid_matrices(coarse_level):
-    gird = grid_generate.generate_fluid_grid(256, 0.3)
+    gird = grid_generate.generate_fluid_grid(32, 0.3)
     A_list = []
     A0, b0 = generate_equation.setup_poisson_equation(gird)
     A_list.append(A0)
@@ -68,28 +68,7 @@ def v_cycle(u, b, levels, restrict, prolongation):
 
     return u[0]
 
-def main():
-    level = 5
-    u = [np.zeros(64 * 64 // (2 ** (2 * i))) for i in range(level)]
-    b = [np.zeros(64 * 64 // (2 ** (2 * i))) for i in range(level)]
-    levels, b[0] = generate_multigrid_matrices(level)
-    solution = v_cycle(u, b, levels, restrict, prolongation)
-    sum1 = 0
-    sum2 = 0
-    A_csr = levels[0].tocsr()
-    x = spsolve(A_csr, b[0])
-    for i in range(len(solution)):
-        if abs(solution[i]) > 1e-10:
-            print(i, solution[i], x[i])
-    for i in range(len(solution)):
-        sum1 += (solution[i] - x[i]) ** 2
-        sum2 += abs(solution[i] - x[i])
-    print(len(solution))
-    print(sum1)
-    print(sum2)
 
-if __name__ == "__main__":
-    main()
 
 
 
