@@ -5,10 +5,10 @@ class TestMGPCG:
     def __init__(self, tolerance=1e-8):
         self.tolerance = tolerance
         self.max_iter = 1000
-        self.matrix_size = 32
+        self.matrix_size = 128
 
     def test_mgpcg(self):
-        level = 5
+        level = 3
         u = [np.zeros(self.matrix_size * self.matrix_size // (2 ** (2 * i))) for i in range(level)]
         b = [np.zeros(self.matrix_size * self.matrix_size // (2 ** (2 * i))) for i in range(level)]
         levels, b[0] = solver.generate_multigrid_matrices(level)
